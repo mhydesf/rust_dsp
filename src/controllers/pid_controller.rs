@@ -1,5 +1,6 @@
 use crate::types::types::Limits;
 use std::time::SystemTime;
+use num::{cast, Num, NumCast};
 
 pub trait Number: PartialOrd + num_traits::Signed + Copy {}
 impl<T: PartialOrd + num_traits::Signed + Copy> Number for T {}
@@ -23,7 +24,7 @@ pub struct PIDController<T: Number> {
 impl<T> PIDController<T>
 where
     T: Number,
-    T: From<f32>,
+    T: Num + NumCast,
 {
     // Create+Initialize new PIDController
     pub fn new() -> Self {
@@ -131,16 +132,16 @@ where
             // P
             let ep = error * self.kp;
             // D
-            let mut ed = (error - self.prev_error) / T::from(dt.as_secs_f32());
+            let mut ed = (error - self.prev_error) / cast(dt.as_secs()).unwrap();
             ed = num_traits::clamp(
-                ed.clone() * self.kd,
+                ed * self.kd,
                 self.d_limits.lower_limit,
                 self.d_limits.upper_limit,
             );
 
             if error.abs() < self.band_limit_i {
                 self.ei = num_traits::clamp(
-                    self.ei.clone() + error * T::from(dt.as_secs_f32()) * self.ki,
+                    self.ei + error * cast(dt.as_secs()).unwrap() * self.ki,
                     self.i_limits.lower_limit,
                     self.i_limits.upper_limit,
                 );
@@ -155,7 +156,7 @@ where
         self.first_sample = false;
 
         result = num_traits::clamp(
-            result.clone(),
+            result,
             self.output_limits.lower_limit,
             self.output_limits.upper_limit,
         );

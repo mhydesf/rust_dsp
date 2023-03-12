@@ -3,6 +3,9 @@ name = "rust_dsp"
 version = "0.1.0"
 edition = "2021"
 
+[dependencies]
+num = "0.4.0"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies.num-traits]
