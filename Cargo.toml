@@ -1,5 +1,5 @@
 [package]
-name = "pid_controller"
+name = "rust_dsp"
 version = "0.1.0"
 edition = "2021"
 
