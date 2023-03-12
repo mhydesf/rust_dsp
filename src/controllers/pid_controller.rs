@@ -1,24 +1,24 @@
 use crate::types::types::Limits;
-use std::time::SystemTime;
 use num::{cast, Num, NumCast};
+use std::time::SystemTime;
 
 pub trait Number: PartialOrd + num_traits::Signed + Copy {}
 impl<T: PartialOrd + num_traits::Signed + Copy> Number for T {}
 
 pub struct PIDController<T: Number> {
-    pub setpoint: T,              // Controller Setpoing
-    pub output_limits: Limits<T>, // Output Limits
-    pub kp: T,                    // Proportional Gain
-    pub ki: T,                    // Integral Gain
-    pub kd: T,                    // Derivative Gain
-    pub p_limits: Limits<T>,      // Proportional Limits
-    pub i_limits: Limits<T>,      // Integral Limits
-    pub d_limits: Limits<T>,      // Derivative Limits
-    band_limit_i: T,              // Integral Band Limit
-    prev_time: SystemTime,        // Timer
-    prev_error: T,                // Previous Error
-    first_sample: bool,           // First Sample Flag
-    ei: T,                        // Integral Term
+    pub setpoint: T,
+    pub kp: T,
+    pub ki: T,
+    pub kd: T,
+    pub p_limits: Limits<T>,
+    pub i_limits: Limits<T>,
+    pub d_limits: Limits<T>,
+    pub output_limits: Limits<T>,
+    band_limit_i: T,
+    prev_time: SystemTime,
+    prev_error: T,
+    first_sample: bool,
+    ei: T,
 }
 
 impl<T> PIDController<T>
@@ -57,6 +57,35 @@ where
         }
     }
 
+    // Load Controller Specific Settings
+    pub fn load_settings(
+        &mut self,
+        output_limits: Limits<T>,
+        kp: T,
+        ki: T,
+        kd: T,
+        p_limits: Limits<T>,
+        i_limits: Limits<T>,
+        d_limits: Limits<T>,
+        band_limit_i: T,
+    ) {
+        self.setpoint = T::zero();
+        self.prev_time = SystemTime::now();
+        self.prev_error = T::zero();
+        self.first_sample = true;
+        self.ei = T::zero();
+
+        self.output_limits = output_limits;
+        self.kp = kp;
+        self.ki = ki;
+        self.kd = kd;
+        self.p_limits = p_limits;
+        self.i_limits = i_limits;
+        self.d_limits = d_limits;
+        self.band_limit_i = band_limit_i;
+    }
+
+    // Reset the controller to base state
     pub fn reset(&mut self) {
         self.setpoint = T::zero();
         self.output_limits = Limits {

@@ -13,6 +13,7 @@ impl<T> IIRFilter<T>
 where
     T: Number,
 {
+    // Generate+Initialize New IIR Filter
     pub fn new() -> Self {
         Self {
             alpha: T::zero(),
@@ -23,6 +24,7 @@ where
         }
     }
 
+    // Reset IIR Filter
     pub fn reset(&mut self) {
         self.initialized = false;
         if self.intial_value {
@@ -30,6 +32,7 @@ where
         }
     }
 
+    // Update IIR Filter
     pub fn update(&mut self, value: T) -> T {
         if !self.initialized {
             initialize_buffer(value);
@@ -38,6 +41,7 @@ where
         buffer
     }
 
+    // Initialized buffer value
     fn initialize_buffer(&mut self, value: T) {
         self.buffer = value;
         self.initialized = true;
