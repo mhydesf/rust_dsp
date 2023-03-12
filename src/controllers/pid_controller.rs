@@ -1,3 +1,4 @@
+use crate::filters::iir_filter::IIRFilter;
 use crate::types::types::Limits;
 use num::{cast, Num, NumCast};
 use std::time::SystemTime;
@@ -14,6 +15,7 @@ pub struct PIDController<T: Number> {
     pub i_limits: Limits<T>,
     pub d_limits: Limits<T>,
     pub output_limits: Limits<T>,
+    filter: IIRFilter<T>,
     band_limit_i: T,
     prev_time: SystemTime,
     prev_error: T,
@@ -49,6 +51,7 @@ where
                 lower_limit: (T::zero()),
                 upper_limit: (T::zero()),
             },
+            filter: IIRFilter::new(),
             band_limit_i: T::zero(),
             prev_time: SystemTime::now(),
             prev_error: T::zero(),
@@ -147,12 +150,20 @@ where
         self
     }
 
+    pub fn filter(&mut self, filter: IIRFilter<T>) {
+        self.filter = filter;
+    }
+
     // Discrete Controller Update
     pub fn update(&mut self, value: T) -> T {
         let now = SystemTime::now();
-        let dt = now.duration_since(self.prev_time).expect("msg");
+        let dt = now
+            .duration_since(self.prev_time)
+            .expect("Unable to make time difference");
 
-        let error = self.setpoint - value;
+        let filtered_value: T = self.filter.update(value);
+
+        let error = self.setpoint - filtered_value;
         let mut result: T;
 
         if self.first_sample {
