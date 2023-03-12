@@ -8,9 +8,15 @@ Please enjoy browsing and I am open to any feedback/contributions for the sake o
 
 This library provides several different controller types (WIP)...
 
+- PID Controller
+- BANG-BANG Controller
+
 ## Filters
 
 This library provides several different filter types (WIP)...
+
+- IIR Filter
+- FIR Filter
 
 ## Types
 
