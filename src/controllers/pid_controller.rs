@@ -15,7 +15,7 @@ pub struct PIDController<T: Number> {
     pub i_limits: Limits<T>,
     pub d_limits: Limits<T>,
     pub output_limits: Limits<T>,
-    filter: IIRFilter<T>,
+    filter: Option<IIRFilter<T>>,
     band_limit_i: T,
     prev_time: SystemTime,
     prev_error: T,
@@ -51,7 +51,7 @@ where
                 lower_limit: (T::zero()),
                 upper_limit: (T::zero()),
             },
-            filter: IIRFilter::new(),
+            filter: None,
             band_limit_i: T::zero(),
             prev_time: SystemTime::now(),
             prev_error: T::zero(),
@@ -151,7 +151,7 @@ where
     }
 
     pub fn filter(&mut self, filter: IIRFilter<T>) {
-        self.filter = filter;
+        self.filter = Some(filter);
     }
 
     // Discrete Controller Update
@@ -160,9 +160,15 @@ where
         let dt = now
             .duration_since(self.prev_time)
             .expect("Unable to make time difference");
+        
+        let filtered_value: T;
 
-        let filtered_value: T = self.filter.update(value);
-
+        if self.filter.is_none() {
+            filtered_value = value;
+        } else {
+            filtered_value = self.filter.as_mut().unwrap().update(value);
+        }
+        
         let error = self.setpoint - filtered_value;
         let mut result: T;
 
