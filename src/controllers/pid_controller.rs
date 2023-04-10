@@ -187,7 +187,7 @@ where
 
             if error.abs() < self.band_limit_i {
                 self.ei = num_traits::clamp(
-                    self.ei + error * cast(dt.as_secs()).unwrap() * self.ki,
+                    (self.ei + error) * cast(dt.as_secs()).unwrap() * self.ki,
                     self.i_limits.lower_limit,
                     self.i_limits.upper_limit,
                 );
